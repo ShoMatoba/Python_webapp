@@ -1,6 +1,13 @@
-from flask import Flask, render_template
+from flask import Flask, render_template,request
+from mysql_model import Person
+from flask_sqlalchemy import SQLAlchemy
+
 
 app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:p%40ssw0rd1@localhost:3307/test_mysql?charset=utf8mb4'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+db = SQLAlchemy(app)
+
 @app.route('/')
 def inex():
 	return 'Response Data'
@@ -24,3 +31,14 @@ def test_request():
 @app.route('/exercise_request/<aaa>')
 def exercise_request(aaa):
 	return f'test_request:{aaa}'
+
+@app.route('/person_search')
+def person_search():
+    return render_template('./person_search.html')
+
+
+@app.route('/person_result')
+def person_result():
+    search_size = request.args.get("search_size")
+    persons = db.session.query(Person).filter(Person.size > search_size)
+    return render_template('./person_result.html', persons=persons, search_size=search_size)
